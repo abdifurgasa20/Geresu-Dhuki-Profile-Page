@@ -1,72 +1,169 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard - Geresu Dhuki Cooperative</title>
+<title>Professional Dashboard - Geresu Dhuki Cooperative</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+
 body{
-    font-family: "Times New Roman", serif;
+    font-family:"Times New Roman", serif;
     background: linear-gradient(to right,#4e73df,#1cc88a);
-    height:100vh;
+    min-height:100vh;
     display:flex;
     justify-content:center;
-    align-items:center;
+    padding:40px;
 }
 
-.dashboard-box{
-    width:90%;
-    max-width:600px;
+.dashboard-container{
+    width:100%;
+    max-width:900px;
     background:white;
     padding:30px;
-    border-radius:15px;
-    box-shadow:0 5px 20px rgba(0,0,0,0.25);
-    text-align:center;
+    border-radius:18px;
+    box-shadow:0 6px 30px rgba(0,0,0,0.25);
+}
+
+.summary{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:18px;
+    margin-top:25px;
 }
 
 .card-box{
-    background:#00cfff33;
-    padding:15px;
-    border-radius:10px;
-    margin-top:15px;
+    background:rgba(0,200,255,0.12);
+    padding:22px;
+    border-radius:14px;
     font-weight:bold;
+    text-align:center;
+    transition:0.3s;
 }
+
+.card-box:hover{
+    transform:translateY(-5px);
+}
+
+.logout-btn{
+    margin-top:25px;
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="dashboard-box">
+<div class="dashboard-container">
 
-<h3>Admin Dashboard</h3>
+<h3 class="text-center">🏦 Cooperative Admin Dashboard</h3>
 
-<h4 id="welcomeUser">Welcome</h4>
+<h5 id="welcomeUser" class="text-center text-primary"></h5>
 
-<div class="card-box">Total Members : 0</div>
-<div class="card-box">Total Savings : 0 ETB</div>
-<div class="card-box">Total Loans : 0 ETB</div>
+<div class="summary">
 
-<button class="btn btn-danger mt-3 w-100" onclick="logout()">Logout</button>
+<div class="card-box" id="membersCard">Total Members : 0</div>
+<div class="card-box" id="savingsCard">Total Savings : 0 ETB</div>
+<div class="card-box" id="loanCard">Total Loans : 0 ETB</div>
+<div class="card-box" id="penaltyCard">Total Penalty : 0 ETB</div>
+
+</div>
+
+<canvas id="financeChart" class="mt-4"></canvas>
+
+<button class="btn btn-danger w-100 logout-btn" onclick="logout()">
+Logout
+</button>
 
 </div>
 
 <script>
 
-// Show logged user name
+/* ================================
+   LOGIN SECURITY CHECK
+================================ */
+
 let user = JSON.parse(localStorage.getItem("loggedIn"));
 
-if(user){
+if(!user){
+    window.location.href = "index.html";
+}else{
     document.getElementById("welcomeUser").innerText =
-    "Welcome " + user.name;
+    "Welcome Admin " + user.name;
 }
 
-// Logout function
+/* ================================
+   LOAD COOPERATIVE DATA
+================================ */
+
+let members = JSON.parse(localStorage.getItem("accounts")) || [];
+
+let totalMembers = members.length;
+
+/* Example business logic */
+let savingsPerMember = 1000;
+let loanPerMember = 500;
+let penaltyRate = 0.02;
+
+let totalSavings = totalMembers * savingsPerMember;
+let totalLoans = totalMembers * loanPerMember;
+let totalPenalty = totalSavings * penaltyRate;
+
+/* ================================
+   DISPLAY DASHBOARD CARDS
+================================ */
+
+document.getElementById("membersCard").innerText =
+"Total Members : " + totalMembers;
+
+document.getElementById("savingsCard").innerText =
+"Total Savings : " + totalSavings + " ETB";
+
+document.getElementById("loanCard").innerText =
+"Total Loans : " + totalLoans + " ETB";
+
+document.getElementById("penaltyCard").innerText =
+"Total Penalty : " + totalPenalty.toFixed(2) + " ETB";
+
+/* ================================
+   CHART VISUALIZATION
+================================ */
+
+const ctx = document.getElementById('financeChart');
+
+new Chart(ctx,{
+type:'bar',
+data:{
+labels:['Members','Savings','Loans','Penalty'],
+datasets:[{
+label:'Cooperative Analytics',
+data:[
+totalMembers,
+totalSavings,
+totalLoans,
+totalPenalty
+],
+backgroundColor:'rgba(0,200,255,0.5)'
+}]
+},
+options:{
+responsive:true,
+plugins:{
+legend:{display:true}
+}
+}
+});
+
+/* ================================
+   LOGOUT FUNCTION
+================================ */
+
 function logout(){
-    localStorage.removeItem("loggedIn");
-    window.location.href = "index.html";
+localStorage.removeItem("loggedIn");
+window.location.href = "index.html";
 }
 
 </script>
