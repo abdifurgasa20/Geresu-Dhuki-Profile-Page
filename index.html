@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Register - GERESU DHUKI SAVING AND CREDIT COOPERATIVE</title>
+    <title>Login - GERESU DHUKI SAVING AND CREDIT COOPERATIVE</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap 5 -->
@@ -19,9 +19,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            transition: all 0.6s ease;
         }
 
-        .register-box {
+        .login-box {
             background-color: #ffffff;
             padding: 35px 30px;
             border-radius: 15px;
@@ -30,7 +31,7 @@
             max-width: 400px;
         }
 
-        .register-box h4 {
+        .login-box h4 {
             font-weight: bold;
             color: purple;
             text-transform: uppercase;
@@ -43,119 +44,108 @@
             font-size: 16px;
         }
 
-        .btn-register {
+        .btn-login {
             background: linear-gradient(to right, #4e73df, #1cc88a);
             color: white;
             font-weight: bold;
             border: none;
         }
 
-        .btn-register:hover {
+        .btn-login:hover {
             background: linear-gradient(to right, #1cc88a, #4e73df);
             color: white;
         }
 
+        a {
+            color: #4e73df;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Password container with modern eye toggle button */
         .position-relative .btn {
             top: 50%;
             transform: translateY(-50%);
         }
-
-        a {
-            color: #4e73df;
-        }
     </style>
 </head>
-<body>
+<body class="page-enter">
 
-<div class="register-box">
+<div class="login-box">
     <h4>GERESU DHUKI SAVING AND CREDIT COOPERATIVE</h4>
 
-    <form onsubmit="register(event)">
+    <form onsubmit="login(event)">
+        <!-- Email or Phone -->
         <div class="mb-3">
-            <input type="text" id="fullName" class="form-control" placeholder="Full Name" required>
+            <input type="text" id="loginContact" class="form-control" placeholder="Email or Phone Number" required>
         </div>
 
-        <div class="mb-3">
-            <input type="text" id="contact" class="form-control" placeholder="Email or Phone Number" required>
-        </div>
-
+        <!-- Password with modern eye toggle -->
         <div class="mb-3 position-relative">
-            <input type="password" id="password" class="form-control" placeholder="Password" required>
+            <input type="password" id="loginPassword" class="form-control" placeholder="Password" required>
             <button type="button" id="togglePassword" class="btn position-absolute end-0 me-2 p-0 border-0 bg-transparent">
                 <i class="bi bi-eye-fill fs-5 text-secondary"></i>
             </button>
         </div>
 
-        <div class="mb-3 position-relative">
-            <input type="password" id="rePassword" class="form-control" placeholder="Re-enter Password" required>
-            <button type="button" id="toggleRePassword" class="btn position-absolute end-0 me-2 p-0 border-0 bg-transparent">
-                <i class="bi bi-eye-fill fs-5 text-secondary"></i>
-            </button>
-        </div>
+        <!-- Log In button -->
+        <button type="submit" class="btn btn-login w-100 mb-2">Log In</button>
 
-        <button type="submit" class="btn btn-register w-100 mb-2">Register</button>
-
-        <div class="text-center">
-            <a href="login.html">Back to Login</a>
+        <!-- Forgot Password link -->
+        <div class="text-center mb-2">
+            <a href="forgot-password.html">Forgot Password?</a>
         </div>
     </form>
+
+    <p class="text-center mt-3">
+        Don't have an account? <a href="register.html">Register here</a>
+    </p>
 </div>
 
 <script>
-    // Load accounts from localStorage
+    // Temporary accounts storage
     let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
 
-    // Password toggle function
-    function togglePasswordBtn(btnId, inputId){
-        const btn = document.getElementById(btnId);
-        const input = document.getElementById(inputId);
-
-        btn.addEventListener('click', () => {
-            const type = input.type === 'password' ? 'text' : 'password';
-            input.type = type;
-
-            const icon = btn.querySelector('i');
-            icon.classList.toggle('bi-eye-fill');
-            icon.classList.toggle('bi-eye-slash-fill');
-        });
-    }
-
-    togglePasswordBtn('togglePassword','password');
-    togglePasswordBtn('toggleRePassword','rePassword');
-
-    // Register function
-    function register(event){
+    // Login function
+    function login(event) {
         event.preventDefault();
+        const contact = document.getElementById('loginContact').value;
+        const password = document.getElementById('loginPassword').value;
 
-        const fullName = document.getElementById('fullName').value.trim();
-        const contact = document.getElementById('contact').value.trim();
-        const password = document.getElementById('password').value;
-        const rePassword = document.getElementById('rePassword').value;
+        const user = accounts.find(acc => acc.contact === contact && acc.password === password);
 
-        // Validation
-        if(password !== rePassword){
-            alert("Passwords do not match!");
-            return;
+        if(user) {
+            alert("Login successful!");
+            localStorage.setItem("loggedIn", JSON.stringify(user));
+
+            // Smooth page transition to dashboard
+            document.body.classList.remove("page-enter");
+            document.body.classList.add("page-exit");
+
+            setTimeout(() => {
+                window.location.href = "dashboard.html";
+            }, 600);
+        } else {
+            alert("Invalid credentials!");
         }
-
-        // Check if contact already exists
-        if(accounts.find(acc => acc.contact === contact)){
-            alert("Account already exists!");
-            return;
-        }
-
-        // Save account
-        const newAccount = {
-            name: fullName,
-            contact: contact,
-            password: password
-        };
-        accounts.push(newAccount);
-        localStorage.setItem("accounts", JSON.stringify(accounts));
-
-        alert("Registration successful! You can now login.");
-        window.location.href = "login.html";
     }
+
+    // Modern eye toggle button
+    const toggleBtn = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('loginPassword');
+
+    toggleBtn.addEventListener('click', () => {
+        const type = passwordInput.type === 'password' ? 'text' : 'password';
+        passwordInput.type = type;
+
+        // Toggle icon
+        const icon = toggleBtn.querySelector('i');
+        icon.classList.toggle('bi-eye-fill');
+        icon.classList.toggle('bi-eye-slash-fill');
+    });
 </script>
 
 </body>
